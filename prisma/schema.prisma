@@ -1,0 +1,264 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  PROFESSIONAL
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED_BY_CUSTOMER
+  CANCELLED_BY_PROFESSIONAL
+  REJECTED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+model User {
+  id              String      @id @default(cuid())
+  email           String      @unique
+  name            String?
+  image           String?
+  role            UserRole    @default(CUSTOMER)
+  emailVerified   DateTime?
+  phone           String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Relations
+  customerBookings Booking[]   @relation("CustomerBookings")
+  professionalBookings Booking[] @relation("ProfessionalBookings")
+  reviewsAsCustomer Review[]    @relation("ReviewCustomer")
+  reviewsAsProfessional Review[] @relation("ReviewProfessional")
+  accounts        Account[]
+  sessions        Session[]
+  profile         ProfessionalProfile?
+  messages        Message[]
+  conversations   ConversationParticipant[]
+  notifications   Notification[]
+
+  @@map("users")
+}
+
+model ProfessionalProfile {
+  id              String      @id @default(cuid())
+  userId          String      @unique
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  headline        String?
+  description     String?
+  address         String?
+  city            String?
+  state           String?
+  country         String?
+  postalCode      String?
+  lat             Float?
+  lng             Float?
+  yearsExperience Int?
+  hourlyRate      Float?
+  isVerified      Boolean     @default(false)
+  isAvailable     Boolean     @default(true)
+  services        Service[]
+  reviews         Review[]    @relation("ProfessionalProfileReviews")
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@map("professional_profiles")
+}
+
+model Category {
+  id              String      @id @default(cuid())
+  name            String      @unique
+  slug            String      @unique
+  description     String?
+  icon            String?
+  parentId        String?
+  parent          Category?   @relation("CategorySubcategories", fields: [parentId], references: [id])
+  subcategories   Category[]  @relation("CategorySubcategories")
+  services        Service[]
+
+  @@map("categories")
+}
+
+model Service {
+  id              String      @id @default(cuid())
+  title           String
+  description     String?
+  price           Float
+  durationMinutes Int?
+  categoryId      String
+  category        Category    @relation(fields: [categoryId], references: [id])
+  professionalId  String
+  professional    ProfessionalProfile @relation(fields: [professionalId], references: [id])
+  images          String[]
+  isActive        Boolean     @default(true)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  bookings        Booking[]
+
+  @@map("services")
+}
+
+model Booking {
+  id                String          @id @default(cuid())
+  customerId        String
+  customer          User            @relation("CustomerBookings", fields: [customerId], references: [id])
+  professionalId    String
+  professional      User            @relation("ProfessionalBookings", fields: [professionalId], references: [id])
+  serviceId         String?
+  service           Service?        @relation(fields: [serviceId], references: [id])
+  customDescription String?
+  scheduledDate     DateTime
+  scheduledEndDate  DateTime?
+  status            BookingStatus   @default(PENDING)
+  totalPrice        Float
+  address           String?
+  notes             String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  payment           Payment?
+  review            Review?
+
+  @@map("bookings")
+}
+
+model Payment {
+  id              String          @id @default(cuid())
+  bookingId       String          @unique
+  booking         Booking         @relation(fields: [bookingId], references: [id])
+  amount          Float
+  currency        String          @default("USD")
+  status          PaymentStatus   @default(PENDING)
+  paymentMethod   String?
+  transactionId   String?
+  metadata        Json?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@map("payments")
+}
+
+model Review {
+  id                String      @id @default(cuid())
+  bookingId         String      @unique
+  booking           Booking     @relation(fields: [bookingId], references: [id])
+  reviewerId        String
+  reviewer          User        @relation("ReviewCustomer", fields: [reviewerId], references: [id])
+  professionalId    String
+  professional      User        @relation("ReviewProfessional", fields: [professionalId], references: [id])
+  professionalProfileId String?
+  professionalProfile   ProfessionalProfile? @relation("ProfessionalProfileReviews", fields: [professionalProfileId], references: [id], onDelete: Cascade)
+  rating            Int
+  comment           String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@map("reviews")
+}
+
+model Conversation {
+  id                String      @id @default(cuid())
+  participants      ConversationParticipant[]
+  messages          Message[]
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@map("conversations")
+}
+
+model ConversationParticipant {
+  id                String      @id @default(cuid())
+  conversationId    String
+  conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId            String
+  user              User         @relation(fields: [userId], references: [id])
+  lastReadAt        DateTime?
+  joinedAt          DateTime    @default(now())
+
+  @@unique([conversationId, userId])
+  @@map("conversation_participants")
+}
+
+model Message {
+  id                String      @id @default(cuid())
+  conversationId    String
+  conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId          String
+  sender            User         @relation(fields: [senderId], references: [id])
+  content           String
+  isRead            Boolean     @default(false)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@map("messages")
+}
+
+model Notification {
+  id                String      @id @default(cuid())
+  userId            String
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type              String
+  title             String
+  body              String?
+  data              Json?
+  isRead            Boolean     @default(false)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@map("notifications")
+}
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
