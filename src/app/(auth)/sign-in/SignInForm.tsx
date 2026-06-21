@@ -13,12 +13,13 @@ export default function SignInForm() {
   };
 
   return (
-    <div className="mt-8 space-y-6">
+    <div className="space-y-6">
       <Button
         onClick={handleGoogleSignIn}
         disabled={isLoading}
-        className="w-full flex items-center justify-center gap-2"
-        variant="outline"
+        className="w-full justify-center"
+        variant="gradient"
+        size="lg"
       >
         <svg className="h-5 w-5" viewBox="0 0 24 24">
           <path
@@ -38,11 +39,11 @@ export default function SignInForm() {
             fill="#EA4335"
           />
         </svg>
-        {isLoading ? 'Signing in...' : 'Sign in with Google'}
+        {isLoading ? 'Opening Google sign-in...' : 'Continue with Google'}
       </Button>
-      <div className="text-center text-sm text-gray-600">
+      <div className="text-center text-sm leading-6 text-neutral-600">
         Don't have an account?{' '}
-        <a href="/sign-up" className="font-medium text-blue-600 hover:underline">
+        <a href="/sign-up" className="font-semibold text-neutral-950 underline underline-offset-4">
           Sign up
         </a>
       </div>

@@ -1,6 +1,9 @@
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { siteConfig } from '@/config/site';
 import SignUpForm from './SignUpForm';
 
 export default async function SignUpPage() {
@@ -10,18 +13,21 @@ export default async function SignUpPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8">
+    <Card className="border-white/70 bg-white/80 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl">
+      <CardHeader className="space-y-4 p-8">
+        <Badge variant="secondary" className="w-fit rounded-full px-3 py-1.5">
+          Start free
+        </Badge>
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Join SkillBridge today
-          </p>
+          <CardTitle className="text-3xl">Create your {siteConfig.name} account</CardTitle>
+          <CardDescription className="mt-3 text-base">
+            Join the marketplace built to feel credible, modern, and ready for real-world service bookings.
+          </CardDescription>
         </div>
+      </CardHeader>
+      <CardContent className="px-8 pb-8">
         <SignUpForm />
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

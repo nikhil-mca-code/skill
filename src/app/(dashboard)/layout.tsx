@@ -1,12 +1,17 @@
-export default function DashboardLayout({
+import { getServerSession } from 'next-auth';
+import { redirect } from 'next/navigation';
+import { authOptions } from '@/lib/auth';
+import { DashboardShell } from '@/components/layout/dashboard-shell';
+
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="flex min-h-screen">
-      {/* Sidebar will be added later */}
-      <main className="flex-1 p-6">{children}</main>
-    </div>
-  );
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    redirect('/sign-in');
+  }
+
+  return <DashboardShell role={session.user.role}>{children}</DashboardShell>;
 }
