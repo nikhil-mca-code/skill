@@ -1,11 +1,4 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
-  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/api/professionals/[id]/route": "app/api/professionals/[id]/route.js",
-  "/api/upload/route": "app/api/upload/route.js",
-  "/api/users/[id]/route": "app/api/users/[id]/route.js",
-  "/api/users/me/route": "app/api/users/me/route.js",
-  "/api/professionals/me/route": "app/api/professionals/me/route.js",
-  "/(auth)/sign-in/page": "app/(auth)/sign-in/page.js",
-  "/(auth)/sign-up/page": "app/(auth)/sign-up/page.js"
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js"
 }
