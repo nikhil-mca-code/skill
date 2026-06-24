@@ -1,22 +1,5 @@
 {
-  "node": {
-    "de83f0989845fb07da9ae087c338f7109e5b5f4e": {
-      "workers": {
-        "app/(public)/professionals/[id]/page": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5Cbdsin%5C%5COneDrive%5C%5CDesktop%5C%5Cgitnikhil.mca.in%5C%5Ccollab-riya%5C%5Cskillbridge-ds%5C%5Csrc%5C%5Clib%5C%5Cactions%5C%5Cbooking.actions.ts%22%2C%5B%22updateBookingStatusAction%22%2C%22createBookingAction%22%5D%5D%5D&__client_imported__=!"
-      },
-      "layer": {
-        "app/(public)/professionals/[id]/page": "rsc"
-      }
-    },
-    "f3417270495e389d6eb94d1debf585230776b96d": {
-      "workers": {
-        "app/(public)/professionals/[id]/page": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22C%3A%5C%5CUsers%5C%5Cbdsin%5C%5COneDrive%5C%5CDesktop%5C%5Cgitnikhil.mca.in%5C%5Ccollab-riya%5C%5Cskillbridge-ds%5C%5Csrc%5C%5Clib%5C%5Cactions%5C%5Cbooking.actions.ts%22%2C%5B%22updateBookingStatusAction%22%2C%22createBookingAction%22%5D%5D%5D&__client_imported__=!"
-      },
-      "layer": {
-        "app/(public)/professionals/[id]/page": "rsc"
-      }
-    }
-  },
+  "node": {},
   "edge": {},
-  "encryptionKey": "ETT10WOdc6SPOEh29VBEq8kzhIloppLvjy1mpOMEW0k="
+  "encryptionKey": "5FheBU00r+9ZgPnD5RfwvjQlqPtgxeB60X3hFIqWZ6I="
 }
