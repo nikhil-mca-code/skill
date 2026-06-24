@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
+import { formatCurrencyInr } from '@/lib/currency';
 
 export default function ServicesPage() {
   const [search, setSearch] = useState('');
@@ -118,12 +119,30 @@ export default function ServicesPage() {
 
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               {servicesQuery.isLoading ? (
-                <Card className="md:col-span-2 xl:col-span-3">
-                  <CardContent className="p-8 text-neutral-500">Loading services...</CardContent>
-                </Card>
+                Array.from({ length: 3 }).map((_, index) => (
+                  <Card key={index} className="overflow-hidden border-white/70 bg-white/80 shadow-[0_18px_60px_rgba(15,23,42,0.08)]">
+                    <CardHeader className="space-y-4 p-6">
+                      <div className="h-5 w-24 animate-pulse rounded-full bg-neutral-200" />
+                      <div className="h-7 w-2/3 animate-pulse rounded-2xl bg-neutral-200" />
+                      <div className="space-y-2">
+                        <div className="h-3 w-full animate-pulse rounded-full bg-neutral-200" />
+                        <div className="h-3 w-5/6 animate-pulse rounded-full bg-neutral-200" />
+                      </div>
+                    </CardHeader>
+                    <CardContent className="flex items-center justify-between gap-4 p-6 pt-0">
+                      <div className="h-4 w-24 animate-pulse rounded-full bg-neutral-200" />
+                      <div className="h-10 w-28 animate-pulse rounded-full bg-neutral-200" />
+                    </CardContent>
+                  </Card>
+                ))
               ) : services.length === 0 ? (
-                <Card className="md:col-span-2 xl:col-span-3">
-                  <CardContent className="p-8 text-neutral-500">No services match your filters.</CardContent>
+                <Card className="md:col-span-2 xl:col-span-3 border-dashed border-neutral-300 bg-white/75 shadow-none">
+                  <CardContent className="flex flex-col items-center justify-center gap-3 p-10 text-center">
+                    <h3 className="text-xl font-semibold text-neutral-950">No services match your filters</h3>
+                    <p className="max-w-xl text-sm text-neutral-500">
+                      Try widening the price range or clearing a filter to see more Indian service options.
+                    </p>
+                  </CardContent>
                 </Card>
               ) : (
                 services.map((service) => (
@@ -137,7 +156,7 @@ export default function ServicesPage() {
                           <CardTitle className="mt-4 text-xl">{service.title}</CardTitle>
                         </div>
                         <div className="rounded-2xl bg-neutral-950 px-3 py-2 text-sm font-semibold text-white">
-                          ${service.price.toFixed(2)}
+                          {formatCurrencyInr(service.price)}
                         </div>
                       </div>
                       <CardDescription className="line-clamp-3">{service.description || 'No description available yet.'}</CardDescription>

@@ -3,8 +3,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { dashboardCopy } from '@/config/site';
 import { cn } from '@/lib/utils';
+import { getDashboardPath } from '@/lib/navigation';
 import { UserRole } from '@prisma/client';
-import { Home, CalendarDays, LayoutGrid, Sparkles, Store } from 'lucide-react';
+import { Home, CalendarDays, LayoutGrid, Sparkles, Store, ChevronRight } from 'lucide-react';
 
 type DashboardShellProps = {
   role: UserRole;
@@ -50,7 +51,10 @@ export function DashboardShell({ role, children }: DashboardShellProps) {
           </div>
 
           <nav className="mt-8 grid gap-2">
-            <Link href="/" className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-neutral-600 transition hover:bg-white hover:text-neutral-950">
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-neutral-600 transition hover:bg-white hover:text-neutral-950"
+            >
               <Home className="h-4 w-4" /> Home
             </Link>
             {items.map((item) => {
@@ -81,17 +85,21 @@ export function DashboardShell({ role, children }: DashboardShellProps) {
 
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-30 border-b border-white/60 bg-white/75 backdrop-blur-xl">
-            <div className="flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+            <div className="flex items-start justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
               <div>
                 <div className="text-xs font-semibold uppercase tracking-[0.24em] text-neutral-500">
                   {role.toLowerCase()}
                 </div>
                 <h1 className="mt-1 text-xl font-semibold text-neutral-950">{copy.title}</h1>
+                <p className="mt-1 max-w-xl text-sm text-neutral-500">{copy.description}</p>
               </div>
 
               <div className="flex items-center gap-3">
                 <Button asChild variant="outline" size="sm" className="hidden md:inline-flex">
-                  <Link href="/">Preview site</Link>
+                  <Link href={getDashboardPath(role)}>
+                    Workspace
+                    <ChevronRight className="h-4 w-4" />
+                  </Link>
                 </Button>
                 <Button asChild variant="ghost" size="sm">
                   <Link href="/">Open marketplace</Link>

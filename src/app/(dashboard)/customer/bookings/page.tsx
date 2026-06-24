@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { getServerSession } from 'next-auth';
 import { UserRole, BookingStatus } from '@prisma/client';
 import { redirect } from 'next/navigation';
@@ -7,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { updateBookingStatusAction } from '@/lib/actions/booking.actions';
+import { getBookingStatusMeta } from '@/lib/booking-status';
+import { formatCurrencyInr } from '@/lib/currency';
 
 export default async function CustomerBookingsPage() {
   const session = await getServerSession(authOptions);
@@ -51,32 +54,56 @@ export default async function CustomerBookingsPage() {
       </section>
 
       <div className="grid gap-4">
-        {bookings.map((booking) => (
-          <Card key={booking.id} className="border-white/70 bg-white/85 shadow-[0_18px_60px_rgba(15,23,42,0.06)] backdrop-blur-xl">
-            <CardHeader className="flex flex-row items-start justify-between gap-4 p-6">
-              <div>
-                <CardTitle className="text-2xl">{booking.service?.title ?? 'Custom booking'}</CardTitle>
-                <CardDescription className="mt-2">
-                  {booking.professional.name || 'Professional'} - {new Date(booking.scheduledDate).toLocaleString()}
-                </CardDescription>
-              </div>
-              <Badge variant="secondary" className="rounded-full px-3 py-1.5">
-                {booking.status.replaceAll('_', ' ')}
-              </Badge>
-            </CardHeader>
-            <CardContent className="p-6 pt-0">
-              {(booking.status === BookingStatus.PENDING || booking.status === BookingStatus.ACCEPTED) && (
-                <form action={updateBookingStatusAction.bind(null, booking.id)} className="flex flex-wrap items-center gap-3">
-                  <input type="hidden" name="returnTo" value="/customer/bookings" />
-                  <input type="hidden" name="status" value={BookingStatus.CANCELLED_BY_CUSTOMER} />
-                  <Button type="submit" variant="outline">
-                    Cancel booking
-                  </Button>
-                </form>
-              )}
+        {bookings.length === 0 ? (
+          <Card className="border-dashed border-neutral-300 bg-white/75 shadow-none">
+            <CardContent className="flex flex-col items-center justify-center gap-4 p-10 text-center">
+              <h2 className="text-xl font-semibold text-neutral-950">No bookings yet</h2>
+              <p className="max-w-md text-sm text-neutral-500">
+                Browse professionals and book a service to see your requests show up here.
+              </p>
+              <Button asChild variant="outline">
+                <Link href="/professionals">Browse professionals</Link>
+              </Button>
             </CardContent>
           </Card>
-        ))}
+        ) : (
+          bookings.map((booking) => {
+            const statusMeta = getBookingStatusMeta(booking.status);
+
+            return (
+              <Card key={booking.id} className="border-white/70 bg-white/85 shadow-[0_18px_60px_rgba(15,23,42,0.06)] backdrop-blur-xl">
+                <CardHeader className="flex flex-row items-start justify-between gap-4 p-6">
+                  <div>
+                    <CardTitle className="text-2xl">{booking.service?.title ?? 'Custom booking'}</CardTitle>
+                    <CardDescription className="mt-2 flex flex-wrap gap-2">
+                      <span>{booking.professional.name || 'Professional'}</span>
+                      <span className="text-neutral-400">•</span>
+                      <span>{new Date(booking.scheduledDate).toLocaleString()}</span>
+                      {booking.service?.price != null ? (
+                        <>
+                          <span className="text-neutral-400">•</span>
+                          <span>{formatCurrencyInr(booking.service.price)}</span>
+                        </>
+                      ) : null}
+                    </CardDescription>
+                  </div>
+                  <Badge className={`rounded-full px-3 py-1.5 ${statusMeta.className}`}>{statusMeta.label}</Badge>
+                </CardHeader>
+                <CardContent className="p-6 pt-0">
+                  {(booking.status === BookingStatus.PENDING || booking.status === BookingStatus.ACCEPTED) && (
+                    <form action={updateBookingStatusAction.bind(null, booking.id)} className="flex flex-wrap items-center gap-3">
+                      <input type="hidden" name="returnTo" value="/customer/bookings" />
+                      <input type="hidden" name="status" value={BookingStatus.CANCELLED_BY_CUSTOMER} />
+                      <Button type="submit" variant="outline">
+                        Cancel booking
+                      </Button>
+                    </form>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })
+        )}
       </div>
     </div>
   );

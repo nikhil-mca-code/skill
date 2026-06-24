@@ -3,17 +3,17 @@ import { BookingStatus, PrismaClient, UserRole } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const categories = [
-  { name: 'Web Development', slug: 'web-development', description: 'Modern websites, landing pages, and web apps.' },
-  { name: 'Mobile Development', slug: 'mobile-development', description: 'Android and iOS app development.' },
-  { name: 'Graphic Design', slug: 'graphic-design', description: 'Brand identities, social creatives, and visuals.' },
-  { name: 'Digital Marketing', slug: 'digital-marketing', description: 'Growth campaigns, SEO, and paid media.' },
-  { name: 'Home Cleaning', slug: 'home-cleaning', description: 'Reliable residential cleaning services.' },
-  { name: 'Plumbing', slug: 'plumbing', description: 'Leak fixes, installations, and maintenance.' },
-  { name: 'Electrician', slug: 'electrician', description: 'Electrical repairs and fit-out services.' },
+  { name: 'Web Development', slug: 'web-development', description: 'Modern websites, landing pages, and SaaS builds for Indian businesses.' },
+  { name: 'Mobile Development', slug: 'mobile-development', description: 'Android and iOS app development for startups and local brands.' },
+  { name: 'Graphic Design', slug: 'graphic-design', description: 'Brand identities, campaign creatives, and social visuals.' },
+  { name: 'Digital Marketing', slug: 'digital-marketing', description: 'Growth campaigns, SEO, and paid media for Indian markets.' },
+  { name: 'Home Services', slug: 'home-services', description: 'Reliable residential cleaning and home care support.' },
+  { name: 'Plumbing', slug: 'plumbing', description: 'Leak fixes, installations, and maintenance visits.' },
+  { name: 'Electrician', slug: 'electrician', description: 'Electrical repairs, fittings, and safety checks.' },
   { name: 'Photography', slug: 'photography', description: 'Portraits, events, and product photography.' },
 ] as const;
 
-const cities = ['Gorakhpur', 'Lucknow', 'Noida', 'Delhi', 'Kanpur'] as const;
+const cities = ['Mumbai', 'Delhi', 'Bengaluru', 'Hyderabad', 'Pune', 'Jaipur', 'Ahmedabad', 'Kochi', 'Lucknow', 'Indore'] as const;
 
 const professionalNames = [
   'Aman Kumar',
@@ -46,7 +46,7 @@ const professionalFocuses = [
   'Mobile developer focused on polished consumer experiences.',
   'Brand designer crafting premium visual identities.',
   'Growth marketer building measurable acquisition systems.',
-  'Cleaning specialist for homes that need dependable care.',
+  'Home services specialist for apartments and family homes.',
   'Plumber handling urgent repairs and neat installations.',
   'Electrician delivering safe, high-quality electrical work.',
   'Photographer producing clean commercial and event imagery.',
@@ -59,8 +59,8 @@ const professionalSpecialties = [
   ['Mobile Development', 'Graphic Design'],
   ['Graphic Design', 'Photography'],
   ['Digital Marketing', 'Web Development'],
-  ['Home Cleaning', 'Digital Marketing'],
-  ['Plumbing', 'Home Cleaning'],
+  ['Home Services', 'Digital Marketing'],
+  ['Plumbing', 'Home Services'],
   ['Electrician', 'Plumbing'],
   ['Photography', 'Graphic Design'],
   ['Web Development', 'Mobile Development'],
@@ -92,7 +92,7 @@ const serviceTemplates = {
     'Content strategy sprint',
     'Lead generation audit',
   ],
-  'Home Cleaning': [
+  'Home Services': [
     'Deep home cleaning',
     'Move-in cleaning service',
     'Kitchen and bath refresh',
@@ -118,6 +118,17 @@ const serviceTemplates = {
   ],
 } as const;
 
+const servicePricingBands: Record<string, { min: number; max: number }> = {
+  'Web Development': { min: 8000, max: 25000 },
+  'Mobile Development': { min: 15000, max: 50000 },
+  'Graphic Design': { min: 500, max: 5000 },
+  'Digital Marketing': { min: 2000, max: 15000 },
+  'Home Services': { min: 300, max: 2000 },
+  Plumbing: { min: 500, max: 3500 },
+  Electrician: { min: 600, max: 4000 },
+  Photography: { min: 1500, max: 12000 },
+} as const;
+
 function slugify(value: string) {
   return value
     .toLowerCase()
@@ -131,6 +142,13 @@ function makeEmail(name: string, index: number) {
 
 function addMinutes(date: Date, minutes: number) {
   return new Date(date.getTime() + minutes * 60_000);
+}
+
+function priceFor(categoryName: keyof typeof servicePricingBands, profileIndex: number, serviceIndex: number) {
+  const band = servicePricingBands[categoryName];
+  const slots = 4;
+  const step = Math.max(1, Math.floor((band.max - band.min) / (slots - 1)));
+  return Math.min(band.max, band.min + step * ((profileIndex + serviceIndex) % slots));
 }
 
 async function main() {
@@ -208,9 +226,9 @@ async function main() {
           city,
           state: 'Uttar Pradesh',
           country: 'India',
-          postalCode: `2730${index}`,
+          postalCode: `${110000 + index}`,
           yearsExperience: 3 + (index % 8),
-          hourlyRate: 600 + index * 120,
+          hourlyRate: 1500 + index * 250,
           isVerified: index % 2 === 0,
           isAvailable: true,
         },
@@ -228,14 +246,14 @@ async function main() {
       const category = createdCategories.find((item) => item.name === specialtyName)!;
       const templateList = serviceTemplates[specialtyName as keyof typeof serviceTemplates];
       const title = templateList[serviceIndex];
-      const price = 900 + profileIndex * 150 + serviceIndex * 100;
+      const price = priceFor(specialtyName as keyof typeof servicePricingBands, profileIndex, serviceIndex);
       const durationMinutes = 60 + serviceIndex * 30;
 
       services.push(
         await prisma.service.create({
           data: {
             title,
-            description: `${title} delivered by ${professionalUsers[profileIndex].name} for clients in ${profile.city}.`,
+            description: `${title} delivered by ${professionalUsers[profileIndex].name} for clients in ${profile.city}, India.`,
             price,
             durationMinutes,
             categoryId: category.id,
@@ -277,7 +295,7 @@ async function main() {
         scheduledEndDate,
         status,
         totalPrice: service.price,
-        address: `${cities[index % cities.length]}, Uttar Pradesh`,
+        address: `${cities[index % cities.length]}, India`,
         notes: `Seed booking for ${profile.userId} scheduled with ${professional.name}.`,
       },
     });

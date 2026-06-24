@@ -61,51 +61,65 @@ export default async function AdminCategoriesPage() {
       </section>
 
       <section className="grid gap-4">
-        {categories.map((category) => (
-          <Card key={category.id} className="border-white/70 bg-white/85 shadow-[0_18px_60px_rgba(15,23,42,0.06)] backdrop-blur-xl">
-            <CardHeader className="flex flex-row items-start justify-between gap-4 p-6">
+        {categories.length === 0 ? (
+          <Card className="border-dashed border-neutral-300 bg-white/75 shadow-none">
+            <CardContent className="flex flex-col items-center justify-center gap-4 p-10 text-center">
+              <div className="grid h-14 w-14 place-items-center rounded-2xl bg-neutral-950 text-white">+</div>
               <div>
-                <CardTitle className="text-2xl">{category.name}</CardTitle>
-                <CardDescription className="mt-2">{category.description || 'No description available yet.'}</CardDescription>
+                <h2 className="text-xl font-semibold text-neutral-950">No categories yet</h2>
+                <p className="mt-2 text-sm text-neutral-500">
+                  Add the first category to start organizing the marketplace taxonomy.
+                </p>
               </div>
-              <Badge variant="secondary" className="rounded-full px-3 py-1.5">
-                {category._count.services} services
-              </Badge>
-            </CardHeader>
-            <CardContent className="space-y-4 p-6 pt-0">
-              <form action={updateCategoryAction.bind(null, category.id)} className="grid gap-4 md:grid-cols-2">
-                <input type="hidden" name="returnTo" value="/admin/categories" />
-                <Input name="name" defaultValue={category.name} required />
-                <Input name="slug" defaultValue={category.slug} />
-                <Input name="icon" defaultValue={category.icon ?? ''} />
-                <select
-                  name="parentId"
-                  defaultValue={category.parentId ?? ''}
-                  className="h-11 rounded-2xl border border-neutral-200 bg-white px-3 text-sm text-neutral-950"
-                >
-                  <option value="">No parent</option>
-                  {categories
-                    .filter((parent) => parent.id !== category.id)
-                    .map((parent) => (
-                      <option key={parent.id} value={parent.id}>
-                        {parent.name}
-                      </option>
-                    ))}
-                </select>
-                <Textarea name="description" defaultValue={category.description ?? ''} rows={3} className="md:col-span-2" />
-                <div className="flex flex-wrap items-center gap-3 md:col-span-2">
-                  <Button type="submit">Save</Button>
-                </div>
-              </form>
-
-              <form action={deleteCategoryAction.bind(null, category.id, '/admin/categories')}>
-                <Button type="submit" variant="outline">
-                  Delete category
-                </Button>
-              </form>
             </CardContent>
           </Card>
-        ))}
+        ) : (
+          categories.map((category) => (
+            <Card key={category.id} className="border-white/70 bg-white/85 shadow-[0_18px_60px_rgba(15,23,42,0.06)] backdrop-blur-xl">
+              <CardHeader className="flex flex-row items-start justify-between gap-4 p-6">
+                <div>
+                  <CardTitle className="text-2xl">{category.name}</CardTitle>
+                  <CardDescription className="mt-2">{category.description || 'No description available yet.'}</CardDescription>
+                </div>
+                <Badge variant="secondary" className="rounded-full px-3 py-1.5">
+                  {category._count.services} services
+                </Badge>
+              </CardHeader>
+              <CardContent className="space-y-4 p-6 pt-0">
+                <form action={updateCategoryAction.bind(null, category.id)} className="grid gap-4 md:grid-cols-2">
+                  <input type="hidden" name="returnTo" value="/admin/categories" />
+                  <Input name="name" defaultValue={category.name} required />
+                  <Input name="slug" defaultValue={category.slug} />
+                  <Input name="icon" defaultValue={category.icon ?? ''} />
+                  <select
+                    name="parentId"
+                    defaultValue={category.parentId ?? ''}
+                    className="h-11 rounded-2xl border border-neutral-200 bg-white px-3 text-sm text-neutral-950"
+                  >
+                    <option value="">No parent</option>
+                    {categories
+                      .filter((parent) => parent.id !== category.id)
+                      .map((parent) => (
+                        <option key={parent.id} value={parent.id}>
+                          {parent.name}
+                        </option>
+                      ))}
+                  </select>
+                  <Textarea name="description" defaultValue={category.description ?? ''} rows={3} className="md:col-span-2" />
+                  <div className="flex flex-wrap items-center gap-3 md:col-span-2">
+                    <Button type="submit">Save</Button>
+                  </div>
+                </form>
+
+                <form action={deleteCategoryAction.bind(null, category.id, '/admin/categories')}>
+                  <Button type="submit" variant="outline">
+                    Delete category
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </section>
     </div>
   );

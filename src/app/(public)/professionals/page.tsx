@@ -137,12 +137,39 @@ export default function ProfessionalsDirectoryPage() {
 
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               {professionalsQuery.isLoading ? (
-                <Card className="md:col-span-2 xl:col-span-3">
-                  <CardContent className="p-8 text-neutral-500">Loading professionals...</CardContent>
-                </Card>
+                Array.from({ length: 3 }).map((_, index) => (
+                  <Card key={index} className="overflow-hidden border-white/70 bg-white/80 shadow-[0_18px_60px_rgba(15,23,42,0.08)]">
+                    <CardHeader className="space-y-4 p-6">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="h-7 w-1/2 animate-pulse rounded-2xl bg-neutral-200" />
+                        <div className="h-8 w-20 animate-pulse rounded-full bg-neutral-200" />
+                      </div>
+                      <div className="h-3 w-40 animate-pulse rounded-full bg-neutral-200" />
+                      <div className="space-y-2">
+                        <div className="h-3 w-full animate-pulse rounded-full bg-neutral-200" />
+                        <div className="h-3 w-5/6 animate-pulse rounded-full bg-neutral-200" />
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4 p-6 pt-0">
+                      <div className="flex gap-2">
+                        <div className="h-7 w-20 animate-pulse rounded-full bg-neutral-200" />
+                        <div className="h-7 w-24 animate-pulse rounded-full bg-neutral-200" />
+                      </div>
+                      <div className="flex items-center justify-between gap-4 border-t border-neutral-200 pt-4">
+                        <div className="h-10 w-24 animate-pulse rounded-full bg-neutral-200" />
+                        <div className="h-10 w-28 animate-pulse rounded-full bg-neutral-200" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
               ) : professionals.length === 0 ? (
-                <Card className="md:col-span-2 xl:col-span-3">
-                  <CardContent className="p-8 text-neutral-500">No professionals match your filters.</CardContent>
+                <Card className="md:col-span-2 xl:col-span-3 border-dashed border-neutral-300 bg-white/75 shadow-none">
+                  <CardContent className="flex flex-col items-center justify-center gap-3 p-10 text-center">
+                    <h3 className="text-xl font-semibold text-neutral-950">No professionals match your filters</h3>
+                    <p className="max-w-xl text-sm text-neutral-500">
+                      Try a different city or remove one filter to uncover more verified experts.
+                    </p>
+                  </CardContent>
                 </Card>
               ) : (
                 professionals.map((professional) => (

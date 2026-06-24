@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { createServiceAction, deleteServiceAction, updateServiceAction } from '@/lib/actions/service.actions';
+import { formatCurrencyInr } from '@/lib/currency';
 
 export default async function ProfessionalServicesPage() {
   const session = await getServerSession(authOptions);
@@ -30,10 +31,10 @@ export default async function ProfessionalServicesPage() {
 
   if (!profile) {
     return (
-      <Card className="border-white/70 bg-white/85 shadow-[0_18px_60px_rgba(15,23,42,0.06)] backdrop-blur-xl">
-        <CardContent className="p-6">
-          <h1 className="text-2xl font-semibold text-neutral-950">Service Module</h1>
-          <p className="mt-2 text-neutral-600">Create your professional profile before adding services.</p>
+      <Card className="border-dashed border-neutral-300 bg-white/75 shadow-none">
+        <CardContent className="flex flex-col items-start gap-3 p-8">
+          <h1 className="text-2xl font-semibold text-neutral-950">Service module unavailable</h1>
+          <p className="max-w-xl text-sm leading-6 text-neutral-500">Create your professional profile before adding services.</p>
         </CardContent>
       </Card>
     );
@@ -87,67 +88,78 @@ export default async function ProfessionalServicesPage() {
       </section>
 
       <section className="grid gap-4">
-        {profile.services.map((service) => (
-          <Card key={service.id} className="border-white/70 bg-white/85 shadow-[0_18px_60px_rgba(15,23,42,0.06)] backdrop-blur-xl">
-            <CardHeader className="flex flex-row items-start justify-between gap-4 p-6">
-              <div>
-                <CardTitle className="text-2xl">{service.title}</CardTitle>
-                <CardDescription className="mt-2">
-                  {service.category.name} {service.durationMinutes ? `- ${service.durationMinutes} mins` : ''}
-                </CardDescription>
-              </div>
-              <div className="text-right">
-                <div className="rounded-2xl bg-neutral-950 px-3 py-2 text-sm font-semibold text-white">
-                  ${service.price.toFixed(2)}
-                </div>
-                <Badge variant={service.isActive ? 'success' : 'secondary'} className="mt-2 rounded-full px-3 py-1.5">
-                  {service.isActive ? 'Active' : 'Inactive'}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4 p-6 pt-0">
-              <form action={updateServiceAction.bind(null, service.id)} className="grid gap-4 md:grid-cols-2">
-                <input type="hidden" name="returnTo" value="/professional/services" />
-                <input type="hidden" name="professionalId" value={profile.id} />
-                <Input name="title" defaultValue={service.title} required />
-                <Input name="price" defaultValue={service.price} type="number" step="0.01" min="0" required />
-                <Input name="durationMinutes" defaultValue={service.durationMinutes ?? ''} type="number" min="1" />
-                <select
-                  name="categoryId"
-                  defaultValue={service.categoryId}
-                  className="h-11 rounded-2xl border border-neutral-200 bg-white px-3 text-sm text-neutral-950"
-                  required
-                >
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-                <Input
-                  name="images"
-                  defaultValue={service.images.join(', ')}
-                  placeholder="Image URLs, comma separated"
-                  className="md:col-span-2"
-                />
-                <Textarea name="description" defaultValue={service.description ?? ''} rows={3} className="md:col-span-2" />
-                <label className="flex items-center gap-2 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700 md:col-span-2">
-                  <input name="isActive" type="checkbox" defaultChecked={service.isActive} />
-                  Active service
-                </label>
-                <div className="flex flex-wrap items-center gap-3 md:col-span-2">
-                  <Button type="submit">Save</Button>
-                </div>
-              </form>
-
-              <form action={deleteServiceAction.bind(null, service.id, '/professional/services')}>
-                <Button type="submit" variant="outline">
-                  Delete service
-                </Button>
-              </form>
+        {profile.services.length === 0 ? (
+          <Card className="border-dashed border-neutral-300 bg-white/75 shadow-none">
+            <CardContent className="flex flex-col items-start gap-3 p-8">
+              <h2 className="text-xl font-semibold text-neutral-950">No services published yet</h2>
+              <p className="max-w-xl text-sm leading-6 text-neutral-500">
+                Add a service to start appearing in search and let customers book your work.
+              </p>
             </CardContent>
           </Card>
-        ))}
+        ) : (
+          profile.services.map((service) => (
+            <Card key={service.id} className="border-white/70 bg-white/85 shadow-[0_18px_60px_rgba(15,23,42,0.06)] backdrop-blur-xl">
+              <CardHeader className="flex flex-row items-start justify-between gap-4 p-6">
+                <div>
+                  <CardTitle className="text-2xl">{service.title}</CardTitle>
+                  <CardDescription className="mt-2">
+                    {service.category.name} {service.durationMinutes ? `- ${service.durationMinutes} mins` : ''}
+                  </CardDescription>
+                </div>
+                <div className="text-right">
+                  <div className="rounded-2xl bg-neutral-950 px-3 py-2 text-sm font-semibold text-white">
+                    {formatCurrencyInr(service.price)}
+                  </div>
+                  <Badge variant={service.isActive ? 'success' : 'secondary'} className="mt-2 rounded-full px-3 py-1.5">
+                    {service.isActive ? 'Active' : 'Inactive'}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4 p-6 pt-0">
+                <form action={updateServiceAction.bind(null, service.id)} className="grid gap-4 md:grid-cols-2">
+                  <input type="hidden" name="returnTo" value="/professional/services" />
+                  <input type="hidden" name="professionalId" value={profile.id} />
+                  <Input name="title" defaultValue={service.title} required />
+                  <Input name="price" defaultValue={service.price} type="number" step="0.01" min="0" required />
+                  <Input name="durationMinutes" defaultValue={service.durationMinutes ?? ''} type="number" min="1" />
+                  <select
+                    name="categoryId"
+                    defaultValue={service.categoryId}
+                    className="h-11 rounded-2xl border border-neutral-200 bg-white px-3 text-sm text-neutral-950"
+                    required
+                  >
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                  <Input
+                    name="images"
+                    defaultValue={service.images.join(', ')}
+                    placeholder="Image URLs, comma separated"
+                    className="md:col-span-2"
+                  />
+                  <Textarea name="description" defaultValue={service.description ?? ''} rows={3} className="md:col-span-2" />
+                  <label className="flex items-center gap-2 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700 md:col-span-2">
+                    <input name="isActive" type="checkbox" defaultChecked={service.isActive} />
+                    Active service
+                  </label>
+                  <div className="flex flex-wrap items-center gap-3 md:col-span-2">
+                    <Button type="submit">Save</Button>
+                  </div>
+                </form>
+
+                <form action={deleteServiceAction.bind(null, service.id, '/professional/services')}>
+                  <Button type="submit" variant="outline">
+                    Delete service
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </section>
     </div>
   );

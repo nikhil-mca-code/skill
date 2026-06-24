@@ -2,7 +2,7 @@ export const siteConfig = {
   name: 'SkillBridge',
   shortName: 'SkillBridge',
   tagline: 'Book trusted professionals with confidence.',
-  description: 'A premium service marketplace for verified professionals, fast booking, and polished client experiences.',
+  description: 'A premium Indian service marketplace for verified professionals, fast booking, and polished client experiences.',
   url: 'https://skillbridge.app',
   nav: [
     { label: 'Professionals', href: '/professionals' },

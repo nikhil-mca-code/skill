@@ -8,6 +8,7 @@ import { createBookingAction } from '@/lib/actions/booking.actions';
 import { prisma } from '@/lib/prisma';
 import { SiteHeader } from '@/components/site/site-header';
 import { SiteFooter } from '@/components/site/site-footer';
+import { formatCurrencyInr } from '@/lib/currency';
 
 export const dynamic = 'force-dynamic';
 
@@ -80,7 +81,7 @@ export default async function ProfessionalProfilePage({ params }: { params: { id
                 </Badge>
                 {professional.hourlyRate ? (
                   <Badge variant="secondary" className="rounded-full px-3 py-1.5">
-                    ${professional.hourlyRate.toFixed(2)}/hr
+                    {formatCurrencyInr(professional.hourlyRate)}/hr
                   </Badge>
                 ) : null}
                 <Badge variant={professional.isAvailable ? 'success' : 'secondary'} className="rounded-full px-3 py-1.5">
@@ -131,7 +132,7 @@ export default async function ProfessionalProfilePage({ params }: { params: { id
                     <select name="serviceId" className="w-full rounded-2xl border border-white/10 bg-white px-3 py-3 text-neutral-950" required>
                       {serviceOptions.map((service) => (
                         <option key={service.id} value={service.id}>
-                          {service.title} - ${service.price.toFixed(2)}
+                          {service.title} - {formatCurrencyInr(service.price)}
                         </option>
                       ))}
                     </select>
@@ -216,7 +217,7 @@ export default async function ProfessionalProfilePage({ params }: { params: { id
                           <h3 className="mt-3 text-xl font-semibold text-neutral-950">{service.title}</h3>
                         </div>
                         <span className="rounded-2xl bg-neutral-950 px-3 py-2 text-sm font-semibold text-white">
-                          ${service.price.toFixed(2)}
+                          {formatCurrencyInr(service.price)}
                         </span>
                       </div>
                       <p className="mt-3 text-sm leading-6 text-neutral-600">

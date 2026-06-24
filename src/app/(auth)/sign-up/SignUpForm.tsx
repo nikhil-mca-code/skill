@@ -3,13 +3,14 @@
 import { signIn } from 'next-auth/react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { DASHBOARD_ROUTE } from '@/lib/navigation';
 
 export default function SignUpForm() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleSignUp = async () => {
     setIsLoading(true);
-    await signIn('google', { callbackUrl: '/dashboard' });
+    await signIn('google', { callbackUrl: DASHBOARD_ROUTE });
   };
 
   return (
