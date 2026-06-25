@@ -21,7 +21,7 @@ export default async function SignUpPage() {
         <div>
           <CardTitle className="text-3xl">Create your {siteConfig.name} account</CardTitle>
           <CardDescription className="mt-3 text-base">
-            Join the marketplace built to feel credible, modern, and ready for real-world service bookings.
+            Create a customer or professional account with secure email/password sign-up and a polished onboarding path.
           </CardDescription>
         </div>
       </CardHeader>

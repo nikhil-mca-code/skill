@@ -1,7 +1,9 @@
 import { DefaultSession, NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
+import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import { UserRole } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 import { prisma } from './prisma';
 
 export const authOptions: NextAuthOptions = {
@@ -14,9 +16,45 @@ export const authOptions: NextAuthOptions = {
         return {
           id: profile.sub,
           name: profile.name,
-          email: profile.email,
+          email: profile.email?.toLowerCase(),
           image: profile.picture,
           role: 'CUSTOMER' as const, // default; can be updated later
+        };
+      },
+    }),
+    CredentialsProvider({
+      name: 'Email and password',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
+      },
+      async authorize(credentials) {
+        const email = credentials?.email?.toLowerCase().trim();
+        const password = credentials?.password;
+
+        if (!email || !password) {
+          return null;
+        }
+
+        const user = await prisma.user.findFirst({
+          where: { email: { equals: email, mode: 'insensitive' } },
+        });
+
+        if (!user?.passwordHash) {
+          return null;
+        }
+
+        const isValid = await bcrypt.compare(password, user.passwordHash);
+        if (!isValid) {
+          return null;
+        }
+
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          image: user.image,
+          role: user.role,
         };
       },
     }),
@@ -25,7 +63,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id ?? token.sub ?? '';
-        session.user.role = token.role ?? UserRole.CUSTOMER;
+        session.user.role = (token.role as UserRole | undefined) ?? UserRole.CUSTOMER;
       }
       return session;
     },
@@ -33,6 +71,9 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.role = user.role;
         token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
+        token.picture = user.image ?? token.picture;
       }
       return token;
     },

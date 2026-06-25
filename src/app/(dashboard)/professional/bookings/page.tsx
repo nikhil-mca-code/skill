@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { getServerSession } from 'next-auth';
 import { UserRole, BookingStatus } from '@prisma/client';
 import { redirect } from 'next/navigation';
@@ -33,8 +34,26 @@ export default async function ProfessionalBookingsPage() {
     },
   });
 
+  const profile = await prisma.professionalProfile.findUnique({
+    where: { userId: session.user.id },
+    select: { id: true },
+  });
+
   return (
     <div className="space-y-6">
+      {!profile ? (
+        <Card className="border-dashed border-neutral-300 bg-white/75 shadow-none">
+          <CardContent className="flex flex-col items-start gap-3 p-8">
+            <h2 className="text-xl font-semibold text-neutral-950">Publish your professional profile first</h2>
+            <p className="max-w-2xl text-sm leading-6 text-neutral-500">
+              Complete onboarding so customers can find you, book you, and see your services in the marketplace.
+            </p>
+            <Button asChild>
+              <Link href="/professional/onboarding">Start onboarding</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : null}
       <section className="rounded-[2rem] border border-white/70 bg-white/85 p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] backdrop-blur-xl">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>

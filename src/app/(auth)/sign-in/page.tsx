@@ -21,7 +21,7 @@ export default async function SignInPage() {
         <div>
           <CardTitle className="text-3xl">Sign in to {siteConfig.name}</CardTitle>
           <CardDescription className="mt-3 text-base">
-            Continue to your professional workspace, client dashboard, or marketplace exploration.
+            Continue with Google or email and password to reach your workspace, client dashboard, or marketplace.
           </CardDescription>
         </div>
       </CardHeader>

@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { getDashboardPath } from '@/lib/navigation';
 import { UserRole } from '@prisma/client';
 import { Home, CalendarDays, LayoutGrid, Sparkles, Store, ChevronRight } from 'lucide-react';
+import { LogoutButton } from './logout-button';
 
 type DashboardShellProps = {
   role: UserRole;
@@ -104,6 +105,7 @@ export function DashboardShell({ role, children }: DashboardShellProps) {
                 <Button asChild variant="ghost" size="sm">
                   <Link href="/">Open marketplace</Link>
                 </Button>
+                <LogoutButton />
               </div>
             </div>
           </header>

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { getServerSession } from 'next-auth';
 import { UserRole } from '@prisma/client';
 import { redirect } from 'next/navigation';
@@ -31,12 +32,17 @@ export default async function ProfessionalServicesPage() {
 
   if (!profile) {
     return (
-      <Card className="border-dashed border-neutral-300 bg-white/75 shadow-none">
-        <CardContent className="flex flex-col items-start gap-3 p-8">
-          <h1 className="text-2xl font-semibold text-neutral-950">Service module unavailable</h1>
-          <p className="max-w-xl text-sm leading-6 text-neutral-500">Create your professional profile before adding services.</p>
-        </CardContent>
-      </Card>
+      <div className="space-y-6">
+        <Card className="border-dashed border-neutral-300 bg-white/75 shadow-none">
+          <CardContent className="flex flex-col items-start gap-3 p-8">
+            <h1 className="text-2xl font-semibold text-neutral-950">Service module unavailable</h1>
+            <p className="max-w-xl text-sm leading-6 text-neutral-500">Create your professional profile before adding services.</p>
+            <Button asChild>
+              <Link href="/professional/onboarding">Start onboarding</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 

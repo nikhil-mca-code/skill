@@ -1,50 +1,98 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import { getToken } from 'next-auth/jwt';
-import { getDashboardPath } from '@/lib/navigation';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
+import { getDashboardPath } from "@/lib/navigation";
 
-// Define protected routes and required roles
+// Routes that require specific roles
 const roleBasedRoutes: Record<string, string[]> = {
-  '/admin': ['ADMIN'],
-  '/professional': ['PROFESSIONAL', 'ADMIN'],
-  '/customer': ['CUSTOMER', 'PROFESSIONAL', 'ADMIN'], // customers can see their dashboard
-  // Add more as needed
+  "/admin": ["ADMIN"],
+  "/professional": ["PROFESSIONAL", "ADMIN"],
+  "/customer": ["CUSTOMER", "PROFESSIONAL", "ADMIN"],
 };
 
+// Public routes
+const publicRoutes = [
+  "/",
+  "/sign-in",
+  "/sign-up",
+  "/services",
+  "/professionals",
+  "/about",
+  "/contact",
+];
+
 export async function middleware(request: NextRequest) {
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
   const { pathname } = request.nextUrl;
 
-  // Public routes (no auth required)
-  const publicPaths = ['/sign-in', '/sign-up', '/', '/services', '/professionals', '/about', '/contact'];
-  const isPublicRoute = publicPaths.some((p) => (p === '/' ? pathname === '/' : pathname === p || pathname.startsWith(`${p}/`)));
+  // --------------------------------------------------
+  // NEVER run authentication on Next.js assets
+  // --------------------------------------------------
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/api/auth") ||
+    pathname === "/favicon.ico" ||
+    pathname === "/robots.txt" ||
+    pathname === "/sitemap.xml" ||
+    pathname.match(/\.(.*)$/) // css, js, png, jpg, svg, ico, map, etc.
+  ) {
+    return NextResponse.next();
+  }
+
+  // --------------------------------------------------
+  // Allow public pages
+  // --------------------------------------------------
+  const isPublicRoute = publicRoutes.some((route) => {
+    if (route === "/") return pathname === "/";
+    return pathname === route || pathname.startsWith(route + "/");
+  });
+
   if (isPublicRoute) {
     return NextResponse.next();
   }
 
-  // If no token, redirect to sign-in
+  // --------------------------------------------------
+  // Authentication
+  // --------------------------------------------------
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
+
   if (!token) {
-    return NextResponse.redirect(new URL('/sign-in', request.url));
+    const url = new URL("/sign-in", request.url);
+    url.searchParams.set("callbackUrl", pathname);
+    return NextResponse.redirect(url);
   }
 
-  // Check role-based access for dashboard routes
+  // --------------------------------------------------
+  // Role-based authorization
+  // --------------------------------------------------
   const userRole = token.role as string;
+
   for (const [route, allowedRoles] of Object.entries(roleBasedRoutes)) {
-    if (pathname.startsWith(route) && !allowedRoles.includes(userRole)) {
-      return NextResponse.redirect(new URL(getDashboardPath(userRole), request.url));
+    if (pathname.startsWith(route)) {
+      if (!allowedRoles.includes(userRole)) {
+        return NextResponse.redirect(
+          new URL(getDashboardPath(userRole), request.url)
+        );
+      }
     }
   }
-
-  // API routes protection: optional additional checks
-  // For API routes, we rely on the route handlers to check authorization
 
   return NextResponse.next();
 }
 
-// Configure which paths the middleware runs on
 export const config = {
   matcher: [
-    // Match all routes except static assets, API routes, and auth endpoints
-    '/((?!_next/static|_next/image|favicon.ico|api/|auth/).*)',
+    /*
+     * Run middleware on everything except:
+     * - api routes
+     * - _next (all Next.js assets)
+     * - favicon
+     * - robots
+     * - sitemap
+     * - any file with an extension
+     */
+    "/((?!api|_next|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)",
   ],
 };
