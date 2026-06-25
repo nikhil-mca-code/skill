@@ -38,6 +38,14 @@ export const authOptions: NextAuthOptions = {
 
         const user = await prisma.user.findFirst({
           where: { email: { equals: email, mode: 'insensitive' } },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+            role: true,
+            passwordHash: true,
+          },
         });
 
         if (!user?.passwordHash) {

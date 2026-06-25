@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
       await prisma.user.update({
         where: { id: existing.id },
         data: {
+          email: normalizedEmail,
           name: parsed.name,
           role: parsed.role,
           passwordHash,

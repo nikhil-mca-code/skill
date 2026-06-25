@@ -7,59 +7,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {
-  CUSTOMER
-  PROFESSIONAL
-  ADMIN
-}
-
-enum BookingStatus {
-  PENDING
-  ACCEPTED
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED_BY_CUSTOMER
-  CANCELLED_BY_PROFESSIONAL
-  REJECTED
-}
-
-enum PaymentStatus {
-  PENDING
-  PAID
-  FAILED
-  REFUNDED
-}
-
 model User {
-  id              String      @id @default(cuid())
-  email           String      @unique
-  name            String?
-  image           String?
-  role            UserRole    @default(CUSTOMER)
-  emailVerified   DateTime?
-  phone           String?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-
-  // Relations
-  customerBookings Booking[]   @relation("CustomerBookings")
-  professionalBookings Booking[] @relation("ProfessionalBookings")
-  reviewsAsCustomer Review[]    @relation("ReviewCustomer")
-  reviewsAsProfessional Review[] @relation("ReviewProfessional")
-  accounts        Account[]
-  sessions        Session[]
-  profile         ProfessionalProfile?
-  messages        Message[]
-  conversations   ConversationParticipant[]
-  notifications   Notification[]
+  id                    String                    @id @default(cuid())
+  email                 String                    @unique
+  name                  String?
+  image                 String?
+  role                  UserRole                  @default(CUSTOMER)
+  emailVerified         DateTime?
+  phone                 String?
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+  accounts              Account[]
+  customerBookings      Booking[]                 @relation("CustomerBookings")
+  professionalBookings  Booking[]                 @relation("ProfessionalBookings")
+  conversations         ConversationParticipant[]
+  messages              Message[]
+  notifications         Notification[]
+  profile               ProfessionalProfile?
+  reviewsAsProfessional Review[]                  @relation("ReviewProfessional")
+  reviewsAsCustomer     Review[]                  @relation("ReviewCustomer")
+  sessions              Session[]
 
   @@map("users")
 }
 
 model ProfessionalProfile {
-  id              String      @id @default(cuid())
-  userId          String      @unique
-  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id              String    @id @default(cuid())
+  userId          String    @unique
   headline        String?
   description     String?
   address         String?
@@ -71,68 +45,67 @@ model ProfessionalProfile {
   lng             Float?
   yearsExperience Int?
   hourlyRate      Float?
-  isVerified      Boolean     @default(false)
-  isAvailable     Boolean     @default(true)
+  isVerified      Boolean   @default(false)
+  isAvailable     Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviews         Review[]  @relation("ProfessionalProfileReviews")
   services        Service[]
-  reviews         Review[]    @relation("ProfessionalProfileReviews")
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
 
   @@map("professional_profiles")
 }
 
 model Category {
-  id              String      @id @default(cuid())
-  name            String      @unique
-  slug            String      @unique
-  description     String?
-  icon            String?
-  parentId        String?
-  parent          Category?   @relation("CategorySubcategories", fields: [parentId], references: [id])
-  subcategories   Category[]  @relation("CategorySubcategories")
-  services        Service[]
+  id            String     @id @default(cuid())
+  name          String     @unique
+  slug          String     @unique
+  description   String?
+  icon          String?
+  parentId      String?
+  parent        Category?  @relation("CategorySubcategories", fields: [parentId], references: [id])
+  subcategories Category[] @relation("CategorySubcategories")
+  services      Service[]
 
   @@map("categories")
 }
 
 model Service {
-  id              String      @id @default(cuid())
+  id              String              @id @default(cuid())
   title           String
   description     String?
   price           Float
   durationMinutes Int?
   categoryId      String
-  category        Category    @relation(fields: [categoryId], references: [id])
   professionalId  String
-  professional    ProfessionalProfile @relation(fields: [professionalId], references: [id])
   images          String[]
-  isActive        Boolean     @default(true)
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-
+  isActive        Boolean             @default(true)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
   bookings        Booking[]
+  category        Category            @relation(fields: [categoryId], references: [id])
+  professional    ProfessionalProfile @relation(fields: [professionalId], references: [id])
 
   @@map("services")
 }
 
 model Booking {
-  id                String          @id @default(cuid())
+  id                String        @id @default(cuid())
   customerId        String
-  customer          User            @relation("CustomerBookings", fields: [customerId], references: [id])
   professionalId    String
-  professional      User            @relation("ProfessionalBookings", fields: [professionalId], references: [id])
   serviceId         String?
-  service           Service?        @relation(fields: [serviceId], references: [id])
   customDescription String?
   scheduledDate     DateTime
   scheduledEndDate  DateTime?
-  status            BookingStatus   @default(PENDING)
+  status            BookingStatus @default(PENDING)
   totalPrice        Float
   address           String?
   notes             String?
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  customer          User          @relation("CustomerBookings", fields: [customerId], references: [id])
+  professional      User          @relation("ProfessionalBookings", fields: [professionalId], references: [id])
+  service           Service?      @relation(fields: [serviceId], references: [id])
   payment           Payment?
   review            Review?
 
@@ -140,105 +113,105 @@ model Booking {
 }
 
 model Payment {
-  id              String          @id @default(cuid())
-  bookingId       String          @unique
-  booking         Booking         @relation(fields: [bookingId], references: [id])
-  amount          Float
-  currency        String          @default("USD")
-  status          PaymentStatus   @default(PENDING)
-  paymentMethod   String?
-  transactionId   String?
-  metadata        Json?
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  id            String        @id @default(cuid())
+  bookingId     String        @unique
+  amount        Float
+  currency      String        @default("USD")
+  status        PaymentStatus @default(PENDING)
+  paymentMethod String?
+  transactionId String?
+  metadata      Json?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  booking       Booking       @relation(fields: [bookingId], references: [id])
 
   @@map("payments")
 }
 
 model Review {
-  id                String      @id @default(cuid())
-  bookingId         String      @unique
-  booking           Booking     @relation(fields: [bookingId], references: [id])
-  reviewerId        String
-  reviewer          User        @relation("ReviewCustomer", fields: [reviewerId], references: [id])
-  professionalId    String
-  professional      User        @relation("ReviewProfessional", fields: [professionalId], references: [id])
+  id                    String               @id @default(cuid())
+  bookingId             String               @unique
+  reviewerId            String
+  professionalId        String
   professionalProfileId String?
+  rating                Int
+  comment               String?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  booking               Booking              @relation(fields: [bookingId], references: [id])
+  professional          User                 @relation("ReviewProfessional", fields: [professionalId], references: [id])
   professionalProfile   ProfessionalProfile? @relation("ProfessionalProfileReviews", fields: [professionalProfileId], references: [id], onDelete: Cascade)
-  rating            Int
-  comment           String?
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
+  reviewer              User                 @relation("ReviewCustomer", fields: [reviewerId], references: [id])
 
   @@map("reviews")
 }
 
 model Conversation {
-  id                String      @id @default(cuid())
-  participants      ConversationParticipant[]
-  messages          Message[]
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
+  id           String                    @id @default(cuid())
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+  participants ConversationParticipant[]
+  messages     Message[]
 
   @@map("conversations")
 }
 
 model ConversationParticipant {
-  id                String      @id @default(cuid())
-  conversationId    String
-  conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  userId            String
-  user              User         @relation(fields: [userId], references: [id])
-  lastReadAt        DateTime?
-  joinedAt          DateTime    @default(now())
+  id             String       @id @default(cuid())
+  conversationId String
+  userId         String
+  lastReadAt     DateTime?
+  joinedAt       DateTime     @default(now())
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id])
 
   @@unique([conversationId, userId])
   @@map("conversation_participants")
 }
 
 model Message {
-  id                String      @id @default(cuid())
-  conversationId    String
-  conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  senderId          String
-  sender            User         @relation(fields: [senderId], references: [id])
-  content           String
-  isRead            Boolean     @default(false)
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
+  id             String       @id @default(cuid())
+  conversationId String
+  senderId       String
+  content        String
+  isRead         Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User         @relation(fields: [senderId], references: [id])
 
   @@map("messages")
 }
 
 model Notification {
-  id                String      @id @default(cuid())
-  userId            String
-  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type              String
-  title             String
-  body              String?
-  data              Json?
-  isRead            Boolean     @default(false)
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  body      String?
+  data      Json?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notifications")
 }
+
 model Account {
   id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
@@ -261,4 +234,27 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verification_tokens")
+}
+
+enum UserRole {
+  CUSTOMER
+  PROFESSIONAL
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED_BY_CUSTOMER
+  CANCELLED_BY_PROFESSIONAL
+  REJECTED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
 }

@@ -1,7 +1,12 @@
 {
+  "/api/onboarding/professional/route": "app/api/onboarding/professional/route.js",
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
   "/page": "app/page.js",
-  "/api/auth/register/route": "app/api/auth/register/route.js",
-  "/(auth)/sign-in/page": "app/(auth)/sign-in/page.js",
-  "/(auth)/sign-up/page": "app/(auth)/sign-up/page.js"
+  "/(public)/services/page": "app/(public)/services/page.js",
+  "/(public)/professionals/page": "app/(public)/professionals/page.js",
+  "/(dashboard)/dashboard/page": "app/(dashboard)/dashboard/page.js",
+  "/(dashboard)/professional/onboarding/page": "app/(dashboard)/professional/onboarding/page.js",
+  "/(dashboard)/professional/services/page": "app/(dashboard)/professional/services/page.js",
+  "/(dashboard)/professional/bookings/page": "app/(dashboard)/professional/bookings/page.js",
+  "/(auth)/sign-in/page": "app/(auth)/sign-in/page.js"
 }
